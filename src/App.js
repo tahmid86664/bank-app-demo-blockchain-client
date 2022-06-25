@@ -1,9 +1,16 @@
-import "./App.css";
+import "./App.scss";
+import { Routes, Route } from "react-router-dom";
+
+import HomePage from "./pages/home-page/HomePage";
+import TransactionPage from "./pages/transaction-page/TransactionPage";
 
 function App() {
   return (
     <div className="app">
-      <h1>Banking App Demonstration</h1>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/transaction" element={<TransactionPage />} />
+      </Routes>
     </div>
   );
 }

@@ -1,0 +1,28 @@
+@import "../../global.scss";
+
+.dummyAccounts {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  .accountContainer {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .account {
+    width: 250px;
+    height: 80px;
+    background-color: $buttonColor;
+    color: white;
+    margin-right: 20px;
+    margin-bottom: 20px;
+    padding: 10px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}

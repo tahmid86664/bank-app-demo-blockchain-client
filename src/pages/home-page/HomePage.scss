@@ -1,0 +1,40 @@
+@import "../../global.scss";
+.homePage {
+  width: 100vw;
+  height: 100vh;
+  background-color: $bgColor;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .homePage__container {
+    width: calc(100vw - 150px);
+    height: calc(100vh - 120px);
+    background-color: white;
+    display: flex;
+    flex-direction: column;
+
+    .topButtons {
+      width: 100%;
+      display: flex;
+
+      .topButton {
+        width: 180px;
+        height: 50px;
+        padding: 10px 15px;
+        background-color: $buttonColor;
+        color: white;
+        font-size: 20px;
+        font-weight: bold;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+
+    .bottom {
+      display: flex;
+    }
+  }
+}

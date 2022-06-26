@@ -1,7 +1,19 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./DummyAccounts.scss";
+import axios from "../../axios";
 
 const DummyAccounts = () => {
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await axios.get("/users");
+      setUsers(res.data);
+    };
+
+    fetchData();
+  });
+
   const handleClick = () => {
     console.log("entering dummy acc");
   };
@@ -10,22 +22,15 @@ const DummyAccounts = () => {
     <div className="dummyAccounts">
       <h1>Dummy Accounts 🧔 </h1>
       <div className="accountContainer">
-        <div className="account" onClick={handleClick}>
-          <div className="accountName">Tahmid</div>
-          <div className="accountNumber">62b15ed7e562bfc4a6b431b7</div>
-        </div>
-        <div className="account" onClick={handleClick}>
-          <div className="accountName">Person</div>
-          <div className="accountNumber">acc no</div>
-        </div>
-        <div className="account" onClick={handleClick}>
-          <div className="accountName">Person</div>
-          <div className="accountNumber">acc no</div>
-        </div>
-        <div className="account" onClick={handleClick}>
-          <div className="accountName">Person</div>
-          <div className="accountNumber">acc no</div>
-        </div>
+        {users.map((user) => (
+          <div key={user._id} className="account" onClick={handleClick}>
+            <div className="accountName">
+              {user.firstName + " " + user.lastName}
+            </div>
+            <div className="accountNumber">Acc no: {user._id}</div>
+            <div className="accountNumber">NID: {user.NID}</div>
+          </div>
+        ))}
       </div>
     </div>
   );

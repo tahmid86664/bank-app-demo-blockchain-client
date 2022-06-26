@@ -1,12 +1,21 @@
 import React, { useState } from "react";
 import "./TransactionPage.scss";
+// import { useNavigate } from "react-router-dom";
 
 const TransactionPage = () => {
   const [stepCounter, setStepCounter] = useState(1);
+  // const navigate = useNavigate();
 
   const handleClick = () => {
     setStepCounter(stepCounter + 1);
   };
+
+  // for redirecting
+  // useEffect(() => {
+  //   if (stepCounter >= 11) {
+  //     navigate("/");
+  //   }
+  // }, [stepCounter]);
 
   return (
     <div className="transactionPage">

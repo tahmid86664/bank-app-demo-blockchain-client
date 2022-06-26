@@ -25,9 +25,13 @@ const DummyAccounts = () => {
         {users.map((user) => (
           <div key={user._id} className="account" onClick={handleClick}>
             <div className="accountName">
-              {user.firstName + " " + user.lastName}
+              {user.firstName[0].toUpperCase() +
+                user.firstName.slice(1) +
+                " " +
+                user.lastName[0].toUpperCase() +
+                user.lastName.slice(1)}
             </div>
-            <div className="accountNumber">Acc no: {user._id}</div>
+            <div className="accountNumber">Acc no: {user.acc}</div>
             <div className="accountNumber">NID: {user.NID}</div>
           </div>
         ))}

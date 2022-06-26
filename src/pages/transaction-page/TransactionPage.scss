@@ -76,6 +76,7 @@
             padding-left: 8px;
             padding-top: 8px;
             color: white;
+            word-wrap: break-word;
           }
         }
       }
@@ -127,6 +128,7 @@
             padding-left: 8px;
             padding-top: 8px;
             color: white;
+            word-wrap: break-word;
           }
         }
       }
@@ -156,6 +158,12 @@
 
           &.current {
             background-color: #fc4801;
+          }
+
+          .stepBlock__data {
+            word-wrap: break-word;
+            background-color: $buttonColor;
+            padding: 5px;
           }
         }
 

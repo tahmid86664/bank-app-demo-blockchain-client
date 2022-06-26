@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import "./Form.scss";
+import { useNavigate } from "react-router-dom";
 
 const Form = ({ isCreateTransaction }) => {
+  const navigate = useNavigate();
   const [transactionType, setTransactionType] = useState(
     "---Transaction Type---"
   );
+  const [branch, setBranch] = useState("branch");
+  const [transactionFormVal, setTransactionFormVal] = useState({});
 
   const handleSubmit = (e) => {
     console.log("created account");
@@ -12,10 +16,25 @@ const Form = ({ isCreateTransaction }) => {
     e.preventDefault();
   };
 
-  const handleCreateTransaction = (e) => {
-    console.log("transaction created");
+  const handleTransactionValChange = (e) => {
+    const { name, value } = e.target;
 
+    setTransactionFormVal((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleCreateTransaction = (e) => {
     e.preventDefault();
+    // console.log(transactionFormVal);
+    transactionFormVal.branch = branch;
+    transactionFormVal.transactionType = transactionType;
+    navigate(`/transaction/${transactionFormVal.acc}`, {
+      state: transactionFormVal,
+    });
+
+    console.log("transaction created");
   };
 
   return (
@@ -42,24 +61,74 @@ const Form = ({ isCreateTransaction }) => {
         ) : (
           <div className="inputContainer">
             <select
+              value={branch}
+              onChange={(e) => {
+                setBranch(e.target.value);
+              }}
+            >
+              <option value="branch">---Select Branch---</option>
+              <option value="1">Branch 1</option>
+              <option value="2">Branch 2</option>
+              <option value="3">Branch 3</option>
+            </select>
+            <select
               value={transactionType}
-              onChange={(e) => setTransactionType(e.target.value)}
+              onChange={(e) => {
+                setTransactionType(e.target.value);
+              }}
             >
               <option value="type">---Transaction Type---</option>
               <option value="cd">cd</option>
               <option value="cw">cw</option>
               <option value="cwo">cwo</option>
             </select>
-            <input type="text" placeholder="Enter account no" />
-            <input type="text" placeholder="Enter NID no" />
+
+            <input
+              type="text"
+              name="acc"
+              placeholder="Enter account no"
+              required
+              onChange={handleTransactionValChange}
+            />
+            <input
+              type="text"
+              name="nid"
+              placeholder="Enter NID no"
+              required
+              onChange={handleTransactionValChange}
+            />
             {transactionType === "cwo" && (
               <>
-                <input type="text" placeholder="Enter withdrawer name" />
-                <input type="text" placeholder="Enter withdrawer NID no" />
-                <input type="text" placeholder="Enter withdrawer mobile" />
+                <input
+                  type="text"
+                  name="name"
+                  placeholder="Enter withdrawer name"
+                  required
+                  onChange={handleTransactionValChange}
+                />
+                <input
+                  type="text"
+                  name="withdrawerNid"
+                  placeholder="Enter withdrawer NID no"
+                  required
+                  onChange={handleTransactionValChange}
+                />
+                <input
+                  type="text"
+                  name="mobile"
+                  placeholder="Enter withdrawer mobile"
+                  required
+                  onChange={handleTransactionValChange}
+                />
               </>
             )}
-            <input type="number" placeholder="Enter amount" />
+            <input
+              type="number"
+              name="amount"
+              placeholder="Enter amount"
+              required
+              onChange={handleTransactionValChange}
+            />
           </div>
         )}
 

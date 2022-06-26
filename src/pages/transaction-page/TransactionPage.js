@@ -1,13 +1,76 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./TransactionPage.scss";
-// import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import axios from "../../axios";
 
 const TransactionPage = () => {
   const [stepCounter, setStepCounter] = useState(1);
   // const navigate = useNavigate();
+  const location = useLocation();
+  const [data, setData] = useState();
+  const [stepState, setStepState] = useState("Data is here");
+  const [otherStepState, setOtherStepState] = useState("");
+  const [blockInfo, setBlockInfo] = useState({});
+  const [isSentOther, setIsSentOther] = useState(false);
+  const [notification, setNotification] = useState("");
+
+  useEffect(() => {
+    setData(location.state);
+  }, []);
 
   const handleClick = () => {
+    doTransactionStep();
     setStepCounter(stepCounter + 1);
+  };
+
+  const doTransactionStep = async () => {
+    if (stepCounter === 1) {
+      setStepState(`Data is here`);
+    }
+    if (stepCounter === 2) {
+      const res = await axios.get(`/transactions/${data.branch}/${data.acc}`);
+      setStepState(
+        `Data found of Acc no ${res.data.data.acc} in ${data.branch}`
+      );
+    } else if (stepCounter === 3) {
+      setStepState(`Sending verification message`);
+    } else if (stepCounter === 4) {
+      setStepState(`Have the OTP and creating block`);
+      setBlockInfo(JSON.stringify(data));
+    } else if (stepCounter === 5) {
+      setIsSentOther(true);
+    } else if (stepCounter === 6) {
+      // jekhane tk joma deya hocche
+      const res1 = await axios.get(
+        `/transactions/${data.branch}/${data.acc}/balance`
+      );
+
+      // other branch er balance
+      const res2 = await axios.get(
+        `/transactions/${getBranch(2)}/${data.acc}/balance`
+      );
+      const res3 = await axios.get(
+        `/transactions/${getBranch(3)}/${data.acc}/balance`
+      );
+
+      if (
+        res1.data.data === res2.data.data &&
+        res1.data.data === res3.data.data
+      ) {
+        setOtherStepState(`Checked the journal and it is Yes`);
+        console.log(res3.data.data);
+      }
+    } else if (stepCounter === 7) {
+      setNotification(
+        `Branch ${getBranch(2)} and Branch ${getBranch(
+          3
+        )} has confirmed the block. Please add the Block to BC`
+      );
+    } else if (stepCounter === 8) {
+      // setStepCounter(stepCounter + 1);
+      console.log("its 8");
+    }
+    console.log(stepCounter);
   };
 
   // for redirecting
@@ -16,6 +79,20 @@ const TransactionPage = () => {
   //     navigate("/");
   //   }
   // }, [stepCounter]);
+
+  const getBranch = (num) => {
+    if (num === 2) {
+      return data.branch !== "1" ? "1" : "2";
+    } else if (num === 3) {
+      if (data.branch !== "1") {
+        if (data.branch === "2") {
+          return "3";
+        } else return "2";
+      } else {
+        return "3";
+      }
+    }
+  };
 
   return (
     <div className="transactionPage">
@@ -32,30 +109,34 @@ const TransactionPage = () => {
               />
             </div>
             <div className="branch">
-              <h2 className="branch_top">Branch 1</h2>
+              <h2 className="branch_top">Branch {data && data.branch}</h2>
               <div className="branch_middle">
-                <div className="workingStatus">Checking data</div>
-                <div className="notification">Notification: 1</div>
+                <div className="workingStatus">{stepState}</div>
+                <div className="notification">{notification}</div>
               </div>
-              <div className="branch_bottom">Block info</div>
+              <div className="branch_bottom">{JSON.stringify(blockInfo)}</div>
             </div>
           </div>
           <div className="middle_left_bottom">
             <div className="branch">
-              <h2 className="branch_top">Branch 2</h2>
+              <h2 className="branch_top">Branch {data && getBranch(2)}</h2>
               <div className="branch_middle">
-                <div className="workingStatus">Checking data</div>
+                <div className="workingStatus">{otherStepState}</div>
                 <div className="notification">Notification: 1</div>
               </div>
-              <div className="branch_bottom">Block info</div>
+              <div className="branch_bottom">
+                {isSentOther && JSON.stringify(blockInfo)}
+              </div>
             </div>
             <div className="branch">
-              <h2 className="branch_top">Branch 3</h2>
+              <h2 className="branch_top">Branch {data && getBranch(3)}</h2>
               <div className="branch_middle">
-                <div className="workingStatus">Checking data</div>
+                <div className="workingStatus">{otherStepState}</div>
                 <div className="notification">Notification: 1</div>
               </div>
-              <div className="branch_bottom">Block info</div>
+              <div className="branch_bottom">
+                {isSentOther && JSON.stringify(blockInfo)}
+              </div>
             </div>
           </div>
         </div>
@@ -63,11 +144,14 @@ const TransactionPage = () => {
         <div className="middle_right">
           <div className="middle_right1">
             <div className={`stepBlock ${stepCounter === 1 && "current"}`}>
-              1. Data in selected branch
+              1. Data in selected branch <br /> <br />
+              <div className="stepBlock__data">{JSON.stringify(data)}</div>
             </div>
             <button
               onClick={handleClick}
-              className={(stepCounter > 11 || stepCounter === 11) && "disabled"}
+              className={`nextButton ${
+                (stepCounter > 11 || stepCounter === 11) && "disabled"
+              }`}
             >
               Next Step
             </button>

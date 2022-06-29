@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import "./TransactionPage.scss";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "../../axios";
 
 const TransactionPage = () => {
   const [stepCounter, setStepCounter] = useState(1);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const [data, setData] = useState();
-  const [stepState, setStepState] = useState("Data is here");
-  const [otherStepState, setOtherStepState] = useState("");
+  const [otp, setOtp] = useState("");
+  const [stepState, setStepState] = useState("Working status");
+  const [otherStepState, setOtherStepState] = useState("Working status");
   const [blockInfo, setBlockInfo] = useState({});
   const [isSentOther, setIsSentOther] = useState(false);
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState("Notification");
+  const [othersNotification, setOthersNotification] = useState("Notification");
+  const [shouldAdd, setShouldAdd] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   useEffect(() => {
     setData(location.state);
@@ -20,25 +24,38 @@ const TransactionPage = () => {
 
   const handleClick = () => {
     doTransactionStep();
-    setStepCounter(stepCounter + 1);
+    // console.log(setData({ ...data, timestamp: new Date() }));
   };
 
   const doTransactionStep = async () => {
     if (stepCounter === 1) {
       setStepState(`Data is here`);
-    }
-    if (stepCounter === 2) {
+    } else if (stepCounter === 2) {
       const res = await axios.get(`/transactions/${data.branch}/${data.acc}`);
       setStepState(
-        `Data found of Acc no ${res.data.data.acc} in ${data.branch}`
+        `Data found of Acc no ${res.data.data.acc} in Branch ${data.branch}`
       );
     } else if (stepCounter === 3) {
-      setStepState(`Sending verification message`);
+      let otpInput = prompt("Enter your OTP ");
+      setOtp(otpInput);
+      setStepState(`Sent verification message`);
     } else if (stepCounter === 4) {
       setStepState(`Have the OTP and creating block`);
-      setBlockInfo(JSON.stringify(data));
+      const res = await axios.post(`/transactions/last`, {
+        acc: data.acc,
+        userNID: data.nid,
+      });
+
+      setBlockInfo({
+        index: res.data.index + 1,
+        ...data,
+        timestamp: new Date(),
+        otp: otp,
+        prevHash: res.data.prevHash,
+      });
     } else if (stepCounter === 5) {
       setIsSentOther(true);
+      setStepState(`Sent to other branches to validate`);
     } else if (stepCounter === 6) {
       // jekhane tk joma deya hocche
       const res1 = await axios.get(
@@ -55,22 +72,77 @@ const TransactionPage = () => {
 
       if (
         res1.data.data === res2.data.data &&
-        res1.data.data === res3.data.data
+        res1.data.data === res3.data.data //+ 1000
       ) {
         setOtherStepState(`Checked the journal and it is Yes`);
-        console.log(res3.data.data);
+        setShouldAdd(true);
+      } else {
+        setOtherStepState(`Checked the journal and it is No. Something wrong`);
       }
     } else if (stepCounter === 7) {
-      setNotification(
-        `Branch ${getBranch(2)} and Branch ${getBranch(
-          3
-        )} has confirmed the block. Please add the Block to BC`
-      );
+      setOtherStepState(`Sent notification to Branch ${data.branch}`);
+
+      if (shouldAdd) {
+        setNotification(
+          `Branch ${getBranch(2)} and Branch ${getBranch(
+            3
+          )} has confirmed the block. Please add the Block to BC`
+        );
+      } else {
+        setNotification(
+          `Branch ${getBranch(2)} and Branch ${getBranch(
+            3
+          )} has rejected the block. Something wrong`
+        );
+        setStepCounter((prevCount) => prevCount + 1);
+      }
     } else if (stepCounter === 8) {
-      // setStepCounter(stepCounter + 1);
-      console.log("its 8");
+      // add to blockchain
+      console.log("workin step 8");
+      const res = await axios.post(
+        `/transactions/add/${data.branch}`,
+        blockInfo
+      );
+      console.log(res);
+      setStepState(
+        `Added the transaction to the blockchain of Acc no. ${data.acc}`
+      );
+      setStepCounter((prevCount) => prevCount + 1);
+    } else if (stepCounter === 9) {
+      // when rejected
+      setStepState(`Transaction rejected`);
+      setOtherStepState(`Transaction rejected`);
+      setStepCounter((prevCount) => prevCount + 2);
+      setIsCompleted(true);
+    } else if (stepCounter === 10) {
+      // send yes to all other branches
+      setStepState(`Sent notification to other branches to add the block`);
+      setOthersNotification(
+        `Transaction has been added to the blockchain by Branch ${data.branch}`
+      );
+    } else if (stepCounter === 11) {
+      // add to others and transaction is completed
+      const res2 = await axios.post(
+        `/transactions/add/${getBranch(2)}`,
+        blockInfo
+      );
+      const res3 = await await axios.post(
+        `/transactions/add/${getBranch(3)}`,
+        blockInfo
+      );
+      console.log(res3);
+      setStepState(`Transaction completed`);
+      setOtherStepState(
+        `Block added and transaction completed by Branch ${data.branch}. Congratulation 🔥 `
+      );
+      setIsCompleted(true);
     }
+    setStepCounter((prevCount) => prevCount + 1);
     console.log(stepCounter);
+  };
+
+  const handleBackToHome = () => {
+    navigate("/");
   };
 
   // for redirecting
@@ -122,7 +194,7 @@ const TransactionPage = () => {
               <h2 className="branch_top">Branch {data && getBranch(2)}</h2>
               <div className="branch_middle">
                 <div className="workingStatus">{otherStepState}</div>
-                <div className="notification">Notification: 1</div>
+                <div className="notification">{othersNotification}</div>
               </div>
               <div className="branch_bottom">
                 {isSentOther && JSON.stringify(blockInfo)}
@@ -132,7 +204,7 @@ const TransactionPage = () => {
               <h2 className="branch_top">Branch {data && getBranch(3)}</h2>
               <div className="branch_middle">
                 <div className="workingStatus">{otherStepState}</div>
-                <div className="notification">Notification: 1</div>
+                <div className="notification">{othersNotification}</div>
               </div>
               <div className="branch_bottom">
                 {isSentOther && JSON.stringify(blockInfo)}
@@ -150,10 +222,17 @@ const TransactionPage = () => {
             <button
               onClick={handleClick}
               className={`nextButton ${
-                (stepCounter > 11 || stepCounter === 11) && "disabled"
+                // (stepCounter > 11 || stepCounter === 11) && "disabled"
+                isCompleted && "disabled"
               }`}
             >
               Next Step
+            </button>
+            <button
+              onClick={handleBackToHome}
+              className={`nextButton ${!isCompleted && "disabled"}`}
+            >
+              Back to Home
             </button>
           </div>
           <div className="middle_right2">

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "./Form.scss";
 import { useNavigate } from "react-router-dom";
+import axios from "../../axios";
 
 const Form = ({ isCreateTransaction }) => {
   const navigate = useNavigate();
@@ -9,11 +10,37 @@ const Form = ({ isCreateTransaction }) => {
   );
   const [branch, setBranch] = useState("branch");
   const [transactionFormVal, setTransactionFormVal] = useState({});
+  const [userFormVal, setUserFormVal] = useState({});
+  const [nominiFormVal, setNominiFormVal] = useState({});
 
-  const handleSubmit = (e) => {
-    console.log("created account");
-
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    // console.log({ ...userFormVal, nomini: nominiFormVal });
+    const res = await axios.post("/users", {
+      ...userFormVal,
+      nomini: nominiFormVal,
+    });
+
+    alert("Account has been created successfully");
+    console.log(res);
+  };
+
+  const handleUserFormValChange = (e) => {
+    const { name, value } = e.target;
+
+    setUserFormVal((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleNominiFormValChange = (e) => {
+    const { name, value } = e.target;
+
+    setNominiFormVal((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
   };
 
   const handleTransactionValChange = (e) => {
@@ -44,19 +71,85 @@ const Form = ({ isCreateTransaction }) => {
       >
         {!isCreateTransaction ? (
           <div className="inputContainer">
-            <input type="text" placeholder="Enter first name" />
-            <input type="text" placeholder="Enter last name" />
-            <input type="text" placeholder="Enter NID no" />
-            <input type="text" placeholder="Enter mobile" />
-            <input type="email" placeholder="Enter email" />
-            <input type="password" placeholder="Enter password for online tr" />
-            <input type="text" placeholder="Enter present address" />
-            <input type="text" placeholder="Enter permanent address" />
-            <input type="text" placeholder="Enter nomini first name" />
-            <input type="text" placeholder="Enter nomini last name" />
-            <input type="text" placeholder="Enter nomini NID no" />
-            <input type="text" placeholder="Enter nomini mobile" />
-            <input type="text" placeholder="Enter relationship with nomini" />
+            <input
+              name="firstName"
+              type="text"
+              placeholder="Enter first name"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="lastName"
+              type="text"
+              placeholder="Enter last name"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="NID"
+              type="text"
+              placeholder="Enter NID no"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="mobile"
+              type="text"
+              placeholder="Enter mobile"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter email"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Enter password for online tr"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="presentAddress"
+              type="text"
+              placeholder="Enter present address"
+              onChange={handleUserFormValChange}
+            />
+            <input
+              name="permanentAddress"
+              type="text"
+              placeholder="Enter permanent address"
+              onChange={handleUserFormValChange}
+            />
+            {/* nomini */}
+            <input
+              name="firstName"
+              type="text"
+              placeholder="Enter nomini first name"
+              onChange={handleNominiFormValChange}
+            />
+            <input
+              name="lastName"
+              type="text"
+              placeholder="Enter nomini last name"
+              onChange={handleNominiFormValChange}
+            />
+            <input
+              name="NID"
+              type="text"
+              placeholder="Enter nomini NID no"
+              onChange={handleNominiFormValChange}
+            />
+            <input
+              name="mobile"
+              type="text"
+              placeholder="Enter nomini mobile"
+              onChange={handleNominiFormValChange}
+            />
+            <input
+              name="relationship"
+              type="text"
+              placeholder="Enter relationship with nomini"
+              onChange={handleNominiFormValChange}
+            />
           </div>
         ) : (
           <div className="inputContainer">

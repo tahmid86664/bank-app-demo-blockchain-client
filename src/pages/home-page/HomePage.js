@@ -29,7 +29,7 @@ const HomePage = () => {
             Create Transaction
           </div>
           <div className="topButton" onClick={(e) => setMenu("da")}>
-            Dummy Accounts
+            All Accounts
           </div>
         </div>
         <div className="bottom">

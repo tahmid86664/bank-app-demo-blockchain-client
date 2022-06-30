@@ -31,10 +31,20 @@ const TransactionPage = () => {
     if (stepCounter === 1) {
       setStepState(`Data is here`);
     } else if (stepCounter === 2) {
+      console.log("step 2");
       const res = await axios.get(`/transactions/${data.branch}/${data.acc}`);
-      setStepState(
-        `Data found of Acc no ${res.data.data.acc} in Branch ${data.branch}`
-      );
+      console.log(res.data);
+      if (res.data.data === null) {
+        setStepState(
+          `Sorry!!😢 Data not found of Acc no ${data.acc}. Transaction canceled 😢`
+        );
+        setStepCounter((prevCount) => prevCount + 12);
+        setIsCompleted(true);
+      } else {
+        setStepState(
+          `Data found of Acc no ${res.data.data.acc} in Branch ${data.branch}`
+        );
+      }
     } else if (stepCounter === 3) {
       let otpInput = prompt("Enter your OTP ");
       setOtp(otpInput);
